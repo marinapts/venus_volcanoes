@@ -12,11 +12,11 @@ class DataLoader:
         # 'E1', 'E2', 'E3', 'E4', 'E5']
         # num_img = 0
 
-        # Combine C1 and D4 training and test sets:
         training_split = []
         testing_split = []
         all_labels = []
 
+        # Obtain experiment data, combine C1 and D4 training and test sets:
         for EXP_NAME in experiment_names:
             training_split.extend(ci.training_split_for(EXP_NAME))
             testing_split.extend(ci.testing_split_for(EXP_NAME))
@@ -28,15 +28,14 @@ class DataLoader:
         training_split.extend(testing_split)
         full_dataset = training_split
 
+        # Shuffle the data
         ordering = np.arange(len(full_dataset))
-
-        # Create Training, validation and test sets
         rng = np.random.default_rng(seed=seed)
         rng.shuffle(ordering)
         full_dataset = [full_dataset[i] for i in ordering]
         self.all_labels = [all_labels[i] for i in ordering]
 
-        # shuffle(full_dataset)
+        # Create training, validation and test sets
         self.validation_set = full_dataset[0:int(val_ratio * (len(full_dataset)))]
         self.testing_set = full_dataset[
                            int(val_ratio * (len(full_dataset))):int((val_ratio + test_ratio) * (len(full_dataset)))]

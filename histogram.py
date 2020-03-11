@@ -20,6 +20,7 @@ ax = sns.barplot(x=categories, y=frequencies, color="red", saturation=.5)
 # ax = sns.countplot(x=frequencies, color="red", saturation=.5, orient='v')
 total = len(labels)
 
+# Display the values above the bars
 for p in ax.patches:
     height = p.get_height()
     ax.text(p.get_x()+p.get_width()/2.,
