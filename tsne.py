@@ -30,6 +30,8 @@ non_zero_labels = [label for label in labels if label != 0]
 # ax = sns.scatterplot(x=transformed_data[:, 0], y=transformed_data[:, 1], hue=non_zero_labels)
 # plt.show()
 
+
+# Perform t-SNE and plot the results for different perplexities
 fig, ax = plt.subplots(3, 2, figsize=(12, 14))
 for ii, perplexity in enumerate([2, 5, 10, 30, 50, 100]):
     print('Performing TSNE with perplexity {}'.format(perplexity))
@@ -41,8 +43,7 @@ for ii, perplexity in enumerate([2, 5, 10, 30, 50, 100]):
     plt.xlabel('Component 1')
     plt.ylabel('Component 2 ')
 plt.legend(loc='center left', bbox_to_anchor=[1.01, 1.5], scatterpoints=3)
-# plt.title('t-SNE Projections on the positive examples')
-fig.suptitle('t-SNE Projections on the positive examples')
+# fig.suptitle('t-SNE Projections on the positive examples')
 fig.tight_layout()
 plt.show()
 
