@@ -63,4 +63,4 @@ ax.set_ylabel('Component 2')
 plt.show()
 
 # Uncomment the line below to save the figure as vector image
-# fig.savefig('pca-positive-examples.pdf')
+# fig.savefig('figures/pca-positive-examples.pdf')

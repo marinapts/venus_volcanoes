@@ -7,5 +7,5 @@ Download the data from Volcanoes on Venus Dataset: https://kdd.ics.uci.edu/datab
 ```bash
 python3 -m venv .env
 source .env/bin/activate
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```

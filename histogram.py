@@ -35,4 +35,4 @@ ax.set_xlabel('Category')
 plt.show()
 
 # Uncomment the line below to save the figure as vector image
-# fig.savefig('class-imbalance-histogram.pdf')
+# fig.savefig('figures/class-imbalance-histogram.pdf')

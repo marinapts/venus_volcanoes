@@ -48,4 +48,4 @@ fig.tight_layout()
 plt.show()
 
 # Uncomment the line below to save the figure as vector image
-fig.savefig('tsne-positive-examples.pdf')
+# fig.savefig('figures/tsne-positive-examples.pdf')
