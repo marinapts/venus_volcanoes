@@ -16,7 +16,15 @@ sns.set(style="whitegrid")
 fig, ax = plt.subplots()
 
 # Create the bar plot
-ax = sns.barplot(x=categories, y=frequencies, color="red", saturation=.5)
+ax = sns.barplot(x=categories,
+                 y=frequencies,
+                 palette = ['navajowhite',
+                            'royalblue',
+                            'cornflowerblue' ,
+                            'lightsteelblue',
+                            'slategrey'],
+                saturation=.5)
+
 # ax = sns.countplot(x=frequencies, color="red", saturation=.5, orient='v')
 total = len(labels)
 
@@ -28,11 +36,11 @@ for p in ax.patches:
             '{:d}'.format(int(height)),
             ha="center")
 
-ax.set_title('Class Label Count')
-ax.set_xlabel('Category')
+#ax.set_title('Class Label Count')
+#ax.set_xlabel('Category')
 
 # Display the plot
-plt.show()
+#plt.show()
 
 # Uncomment the line below to save the figure as vector image
-# fig.savefig('figures/class-imbalance-histogram.pdf')
+fig.savefig('figures/class-imbalance-histogram.pdf', bbox_inches = 'tight')
