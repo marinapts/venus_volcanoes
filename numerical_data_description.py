@@ -40,20 +40,25 @@ def mean_image_by_class(full_dataset, labels):
     #Mean image by class
 
     full_dataset = np.array(full_dataset)
-    fig, ax = plt.subplots(nrows=3, ncols=2, figsize=(9, 6))
-    mean_image = np.mean(full_dataset, axis = 0)
-    plt.subplot(3, 2, 1, aspect='equal')
-    ax = plt.imshow(mean_image.reshape(15,15), cmap='Greys')
-    plt.title('Full Dataset')
-    plt.axis('off')
-    for ii, label in enumerate(np.unique(labels)):
-        ix = np.where(labels == label)
-        mean_image = np.mean(full_dataset[list(ix[0]), :], axis = 0)
-        plt.subplot(3, 2, ii + 2, aspect='equal')
-        ax = plt.imshow(mean_image.reshape(15,15), cmap='Greys')
-        plt.title('Class {}'.format(label))
-        plt.axis('off')
-    plt.subplots_adjust(wspace=0, hspace=0)
+    fig, ax = plt.subplots(nrows=3, ncols=2) #, figsize=(9, 6))
+    ii = 0
+    for rr, row in enumerate(ax):
+        for cc, col in enumerate(row):
+            if rr == 0 and cc == 0:
+                mean_image = np.mean(full_dataset, axis = 0)
+                col.imshow(mean_image.reshape(15,15)) #, cmap='Greys')
+                col.set_title('Full Dataset')
+                col.axis('off')
+            else:
+                label = np.unique(labels)[ii]
+                print(label)
+                ix = np.where(labels == label)
+                mean_image = np.mean(full_dataset[list(ix[0]), :], axis = 0)
+                col.imshow(mean_image.reshape(15,15)) #, cmap='Greys')
+                col.set_title('Class ' + str(label))
+                col.axis('off')
+                ii += 1
+    #plt.subplots_adjust(wspace=0, hspace=0)
     fig.savefig('figures/mean_images.pdf', format = 'pdf', bbox_inches = 'tight')
 
 def table_meanstd_per_class(full_dataset, labels):
@@ -135,7 +140,7 @@ if __name__ == '__main__':
     #plt.show()
 
     #Normalize Dataset
-    #full_dataset, labels = normalize_ds(full_dataset, labels)
+    full_dataset, labels = normalize_ds(full_dataset, labels)
 
     #Mean image by class
     mean_image_by_class(full_dataset, labels)
