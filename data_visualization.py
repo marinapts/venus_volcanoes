@@ -1,7 +1,46 @@
-from pca_experiments import load_data, normalize_ds
+from reduce_dimensionality import load_data, normalize_ds
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+def histogram(labels):
+    categories = [0, 1, 2, 3, 4]
+    frequencies = np.bincount(labels)
+
+    # Set grid style
+    sns.set(style="whitegrid")
+
+    fig, ax = plt.subplots()
+
+    # Create the bar plot
+    ax = sns.barplot(x=categories,
+                     y=frequencies,
+                     palette = ['navajowhite',
+                                'royalblue',
+                                'cornflowerblue' ,
+                                'lightsteelblue',
+                                'slategrey'],
+                    saturation=.5)
+
+    # ax = sns.countplot(x=frequencies, color="red", saturation=.5, orient='v')
+    total = len(labels)
+
+    # Display the values above the bars
+    for p in ax.patches:
+        height = p.get_height()
+        ax.text(p.get_x()+p.get_width()/2.,
+                height + 3,
+                '{:d}'.format(int(height)),
+                ha="center")
+
+    #ax.set_title('Class Label Count')
+    #ax.set_xlabel('Category')
+
+    # Display the plot
+    #plt.show()
+
+    # Uncomment the line below to save the figure as vector image
+    fig.savefig('figures/class-imbalance-histogram.pdf', bbox_inches = 'tight')
 
 def remove_black_images(full_dataset, labels):
     # Normalise each image
@@ -96,19 +135,7 @@ def violin_plot(full_dataset, labels):
     ax.tick_params(labelsize=15)
     fig.savefig('figures/violin.pdf', format = 'pdf', bbox_inches = 'tight')
 
-if __name__ == '__main__':
-    seed = 8
-    full_dataset, labels = load_data()
-    full_dataset = np.array(full_dataset)
-
-    #Hist full
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-    mean_per_image = np.mean(full_dataset, axis = 1)
-    ax = sns.distplot(mean_per_image) #, bins = 50)
-    ax.set_xlabel('Brightness')
-    fig.savefig('figures/histogram.pdf', format = 'pdf', bbox_inches = 'tight')
-
-    #Barplot Labels
+def barplot_label(labels):
     len_list = []
     fig, ax = plt.subplots(1, 1) #, figsize=(10, 10))
     for ll in np.unique(labels):
@@ -125,6 +152,23 @@ if __name__ == '__main__':
     fig.savefig('figures/labelsdistr.pdf', format = 'pdf', bbox_inches = 'tight')
 
 
+if __name__ == '__main__':
+    seed = 8
+    full_dataset, labels = load_data()
+    full_dataset = np.array(full_dataset)
+
+    #Hist full
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+    mean_per_image = np.mean(full_dataset, axis = 1)
+    ax = sns.distplot(mean_per_image) #, bins = 50)
+    ax.set_xlabel('Brightness')
+    fig.savefig('figures/histogram.pdf', format = 'pdf', bbox_inches = 'tight')
+
+    #Barplot Labels
+    barplot_label(labels)
+    #or
+    histogram(labels)
+
     #Hist by class
     full_dataset, labels = remove_black_images(full_dataset, labels)
     full_dataset = np.array(full_dataset)
@@ -140,7 +184,7 @@ if __name__ == '__main__':
     #plt.show()
 
     #Normalize Dataset
-    full_dataset, labels = normalize_ds(full_dataset, labels)
+    #full_dataset, labels = normalize_ds(full_dataset, labels)
 
     #Mean image by class
     mean_image_by_class(full_dataset, labels)
