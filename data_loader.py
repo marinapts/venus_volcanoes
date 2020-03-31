@@ -107,10 +107,10 @@ class DataLoader:
     def get_all_labels(self):
         return self.all_labels
 
-    def get_data_tuples(self):
+    def get_data_tuple(self):
         """
-        Acts like a getter, but returns all sets at once as tuples for one-line
-        :return: tuple of (data, labels)
+        Acts like a getter, but returns all sets at once as a tuple
+        :return: tuple of all splits and corresponding labels as (set, labels), (set, labels), ...
         """
         return self.training_set, self.training_labels, self.validation_set, self.validation_labels, \
                self.testing_set, self.testing_labels
