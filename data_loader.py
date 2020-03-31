@@ -42,7 +42,7 @@ class DataLoader:
         self.testing_set = full_dataset[
                            int(val_ratio * (len(full_dataset))):int((val_ratio + test_ratio) * (len(full_dataset)))]
         self.testing_labels = self.all_labels[
-                               int(val_ratio * (len(full_dataset))):int((val_ratio + test_ratio) * (len(full_dataset)))]
+                              int(val_ratio * (len(full_dataset))):int((val_ratio + test_ratio) * (len(full_dataset)))]
 
         self.training_set = full_dataset[int((val_ratio + test_ratio) * (len(full_dataset))):]
         self.training_labels = self.all_labels[
@@ -81,7 +81,7 @@ class DataLoader:
             np.place(y_val, mask=y_val > 0, vals=1)
             np.place(y_test, mask=y_test > 0, vals=1)
 
-        return (X_train, y_train), (X_val, y_val), (X_test, y_test)
+        return X_train, y_train, X_val, y_val, X_test, y_test
 
     def get_training_set(self):
         return self.training_set
@@ -106,6 +106,14 @@ class DataLoader:
 
     def get_all_labels(self):
         return self.all_labels
+
+    def get_data_tuples(self):
+        """
+        Acts like a getter, but returns all sets at once as tuples for one-line
+        :return: tuple of (data, labels)
+        """
+        return self.training_set, self.training_labels, self.validation_set, self.validation_labels, \
+               self.testing_set, self.testing_labels
 
 
 if __name__ == "__main__":
