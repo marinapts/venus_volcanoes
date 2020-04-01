@@ -8,8 +8,7 @@ from sklearn.manifold import LocallyLinearEmbedding, MDS, Isomap
 def load_data():
     # Load the data
     data_loader = DataLoader()
-    full_dataset = data_loader.get_full_dataset()
-    labels = data_loader.get_labels()
+    full_dataset, labels = data_loader.get_full_dataset()
     return full_dataset, labels
 
 def normalise(array):
@@ -57,27 +56,37 @@ def locally_linear_embedding(dataset, num_comps, seed, num_neighbors=5):
 
 def multi_dim_scaling(dataset, num_comps, seed, num_neighbors=5, metric=True):
     embedding = MDS(n_components=num_comps, random_state=seed)
-    fit_positives = embedding.fit(dataset)
-    return fit_positives
+    transformed_data = embedding.fit_transform(dataset)
+    print('multi_dim_scaling: ', dataset.shape, transformed_data.shape)
+    return transformed_data
 
 def isomap_transform(dataset, num_comps, seed, num_neighbors=5):
     embedding = Isomap(n_components=num_comps, n_neighbors=num_neighbors)
     fit_positives = embedding.fit(dataset)
     return fit_positives
 
-def reduce_dims(type_transform, dataset, labels, num_comps, seed, perplexity=None, num_neighbors=None, metric=True):
-    positives = np.array(dataset)[np.where(np.array(labels)>0)[0],:]
+
+def reduce_dims(type_transform, dataset, labels, num_comps, seed, perplexity=None, num_neighbors=None, metric=True, only_positives=True):
+    if only_positives == True:
+        print('Use only positives for fit')
+        used_for_fit = np.array(dataset)[np.where(np.array(labels)>0)[0],:]
+    else:
+        print('Use all for fit')
+        used_for_fit = dataset
     if type_transform == 'pca':
-        fit_positives = pca_transform(positives, num_comps, seed, perplexity=None)
+        fit_positives = pca_transform(used_for_fit, num_comps, seed, perplexity=None)
+        transformed_data = fit_positives.transform(dataset)
     elif type_transform == 'umap':
-        fit_positives = umap_transform(positives, num_comps, seed)
+        fit_positives = umap_transform(used_for_fit, num_comps, seed)
+        transformed_data = fit_positives.transform(dataset)
     elif type_transform == 'lle':
-        fit_positives = locally_linear_embedding(positives, num_comps, seed, num_neighbors)
+        fit_positives = locally_linear_embedding(used_for_fit, num_comps, seed, num_neighbors)
+        transformed_data = fit_positives.transform(dataset)
     elif type_transform == 'mds':
-        fit_positives = multi_dim_scaling(positives, num_comps, seed)
+        transformed_data = multi_dim_scaling(used_for_fit, num_comps, seed)
     elif type_transform == 'isomap':
-        fit_positives = isomap_transform(positives, num_comps, seed)
-    transformed_data = fit_positives.transform(dataset)
+        fit_positives = isomap_transform(used_for_fit, num_comps, seed)
+        transformed_data = fit_positives.transform(dataset)
     return transformed_data
 
 if __name__ == '__main__':
