@@ -186,6 +186,39 @@ class ChipsIndex(object):
 
             return self.normalized, self.y
 
+    def get_specific(self, experiment_name, normalized = False):
+        if self.x is None:
+            exp = self.idx[experiment_name]
+
+            x = [z for z in exp[self.SPLIT_TRN][:]]
+            x.extend([z for z in exp[self.SPLIT_TST]])
+
+            exp = self.labels_for(experiment_name)
+
+            y = [z for z in exp[self.SPLIT_TRN][:]]
+            y.extend([z for z in exp[self.SPLIT_TST]])
+
+            exp = self.image_numbers_for(experiment_name)
+
+            i = [z for z in exp[self.SPLIT_TRN][:]]
+            i.extend([z for z in exp[self.SPLIT_TST]])
+
+            self.x = x
+            self.y = y
+            self.i = i
+
+        if not normalized:
+            return self.x, self.y
+        else:
+            if self.normalized is None:
+                Xn = []
+                imnums = self.i
+
+                for i, x in enumerate(self.x):
+                    Xn.append(normalize_chip(x, *self.image_stats[imnums[i]]))
+
+                self.normalized = Xn
+
     def training_split_for(self, exp):
         return self.idx[exp][self.SPLIT_TRN]
 

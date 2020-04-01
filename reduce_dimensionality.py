@@ -8,8 +8,7 @@ from sklearn.manifold import LocallyLinearEmbedding, MDS, Isomap
 def load_data():
     # Load the data
     data_loader = DataLoader()
-    full_dataset = data_loader.get_full_dataset()
-    labels = data_loader.get_labels()
+    full_dataset, labels = data_loader.get_full_dataset()
     return full_dataset, labels
 
 def normalise(array):
@@ -37,23 +36,23 @@ def normalize_ds(full_dataset, labels):
 def pca_transform(dataset, num_comps, seed, perplexity=None):
     # Perform 2-dimensional projection via PCA
     pca = sklearn.decomposition.PCA(n_components=num_comps, random_state=seed)
-    transformed_data = pca.fit_transform(dataset)
-    return transformed_data
+    fit_positives = pca.fit(dataset)
+    return fit_positives
 
 def tsne_transform(dataset, num_comps, perplexity, seed):
     tsne = TSNE(n_components=num_comps, random_state=seed, perplexity=perplexity)
-    transformed_data = tsne.fit_transform(dataset)
-    return transformed_data
+    fit_positives = tsne.fit(dataset)
+    return fit_positives
 
 def umap_transform(dataset, num_comps, seed):
     embedding = umap.UMAP(n_components=num_comps, random_state=seed)
-    transformed_data = embedding.fit_transform(dataset)
-    return transformed_data
+    fit_positives = embedding.fit(dataset)
+    return fit_positives
 
 def locally_linear_embedding(dataset, num_comps, seed, num_neighbors=5):
     embedding = LocallyLinearEmbedding(n_components=num_comps, random_state=seed, n_neighbors=num_neighbors)
-    transformed_data = embedding.fit_transform(dataset)
-    return transformed_data
+    fit_positives = embedding.fit(dataset)
+    return fit_positives
 
 def multi_dim_scaling(dataset, num_comps, seed, num_neighbors=5, metric=True):
     embedding = MDS(n_components=num_comps, random_state=seed)
@@ -62,22 +61,28 @@ def multi_dim_scaling(dataset, num_comps, seed, num_neighbors=5, metric=True):
 
 def isomap_transform(dataset, num_comps, seed, num_neighbors=5):
     embedding = Isomap(n_components=num_comps, n_neighbors=num_neighbors)
-    transformed_data = embedding.fit_transform(dataset)
-    return transformed_data
+    fit_positives = embedding.fit(dataset)
+    return fit_positives
 
-def reduce_dims(type_transform, dataset, num_comps, seed, perplexity=None, num_neighbors=None, metric=True):
+def reduce_dims(type_transform, dataset, labels, num_comps, seed, perplexity=None, num_neighbors=None, metric=True, only_positives=True):
+    if only_positives == True:
+        used_for_fit = np.array(dataset)[np.where(np.array(labels)>0)[0],:]
+    else:
+        used_for_fit = dataset
     if type_transform == 'pca':
-        transformed_data = pca_transform(dataset, num_comps, seed, perplexity=None)
+        fit_positives = pca_transform(used_for_fit, num_comps, seed, perplexity=None)
+        transformed_data = fit_positives.transform(dataset)
     elif type_transform == 'umap':
-        transformed_data = umap_transform(dataset, num_comps, seed)
+        fit_positives = umap_transform(used_for_fit, num_comps, seed)
+        transformed_data = fit_positives.transform(dataset)
     elif type_transform == 'lle':
-        transformed_data = locally_linear_embedding(dataset, num_comps, seed, num_neighbors)
+        fit_positives = locally_linear_embedding(used_for_fit, num_comps, seed, num_neighbors)
+        transformed_data = fit_positives.transform(dataset)
     elif type_transform == 'mds':
         transformed_data = multi_dim_scaling(dataset, num_comps, seed)
     elif type_transform == 'isomap':
-        transformed_data = isomap_transform(dataset, num_comps, seed)
-    else:
-        print('unknown transformation type')
+        fit_positives = isomap_transform(dataset, num_comps, seed)
+        transformed_data = fit_positives.transform(dataset)
     return transformed_data
 
 if __name__ == '__main__':
@@ -88,23 +93,23 @@ if __name__ == '__main__':
     full_dataset, labels = normalize_ds(full_dataset, labels)
 
     #PCA
-    reduced_data = reduce_dims('pca', full_dataset, num_comps, seed)
+    reduced_data = reduce_dims('pca', full_dataset, labels, num_comps, seed)
     print(reduced_data.shape)
 
     #UMAP
-    reduced_data = reduce_dims('umap', full_dataset, num_comps, seed)
+    reduced_data = reduce_dims('umap', full_dataset, labels, num_comps, seed)
     print(reduced_data.shape)
 
     #LLE:
-    reduced_data = reduce_dims('lle', full_dataset, num_comps, seed, num_neighbors=5)
+    reduced_data = reduce_dims('lle', full_dataset, labels, num_comps, seed, num_neighbors=5)
     print(reduced_data.shape)
 
     #MDS:
-    reduced_data = reduce_dims('mds', full_dataset, num_comps, seed, metric=True)
+    reduced_data = reduce_dims('mds', full_dataset, labels, num_comps, seed, metric=True)
     print(reduced_data.shape)
 
     #Isomap:
-    reduced_data = reduce_dims('isomap', full_dataset, num_comps, seed)
+    reduced_data = reduce_dims('isomap', full_dataset, labels, num_comps, seed)
     print(reduced_data.shape)
 
 
