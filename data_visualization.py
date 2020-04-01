@@ -1,7 +1,8 @@
-from reduce_dimensionality import load_data, normalize_ds
+from reduce_dimensionality import load_data, normalize_ds, pca_transform
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from src.pyvov import ChipsIndex
 
 def histogram(labels):
     categories = [0, 1, 2, 3, 4]
@@ -85,7 +86,7 @@ def mean_image_by_class(full_dataset, labels):
         for cc, col in enumerate(row):
             if rr == 0 and cc == 0:
                 mean_image = np.mean(full_dataset, axis = 0)
-                col.imshow(mean_image.reshape(15,15)) #, cmap='Greys')
+                col.imshow(mean_image.reshape(15,15), cmap='Greys')
                 col.set_title('Full Dataset')
                 col.axis('off')
             else:
@@ -93,7 +94,7 @@ def mean_image_by_class(full_dataset, labels):
                 print(label)
                 ix = np.where(labels == label)
                 mean_image = np.mean(full_dataset[list(ix[0]), :], axis = 0)
-                col.imshow(mean_image.reshape(15,15)) #, cmap='Greys')
+                col.imshow(mean_image.reshape(15,15), cmap='Greys')
                 col.set_title('Class ' + str(label))
                 col.axis('off')
                 ii += 1
@@ -151,22 +152,37 @@ def barplot_label(labels):
                                    'slategrey']) #, bins = 50)
     fig.savefig('figures/labelsdistr.pdf', format = 'pdf', bbox_inches = 'tight')
 
+def volcano_examples(dataset, labels, filename):
+    fig, ax = plt.subplots(nrows=10, ncols=10) #, figsize=(9, 6))
+    ii = 0
+    for rr, row in enumerate(ax):
+        for cc, col in enumerate(row):
+            col.imshow(dataset[ii].reshape(15,15), cmap='Greys')
+            ii+=1
+            col.axis('off')
+    fig.savefig(filename, format = 'pdf', bbox_inches = 'tight')
+
+
 if __name__ == '__main__':
     seed = 8
     full_dataset, labels = load_data()
-    full_dataset = np.array(full_dataset)
+
+    ci = ChipsIndex()
+    full_dataset, labels = ci.get_all()
+
+    #full_dataset = np.array(full_dataset)
 
     #Hist full
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-    mean_per_image = np.mean(full_dataset, axis = 1)
-    ax = sns.distplot(mean_per_image) #, bins = 50)
-    ax.set_xlabel('Brightness')
-    fig.savefig('figures/histogram.pdf', format = 'pdf', bbox_inches = 'tight')
+    # fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+    # mean_per_image = np.mean(full_dataset, axis = 1)
+    # ax = sns.distplot(mean_per_image) #, bins = 50)
+    # ax.set_xlabel('Brightness')
+    # fig.savefig('figures/histogram.pdf', format = 'pdf', bbox_inches = 'tight')
 
     #Barplot Labels
-    barplot_label(labels)
+    #barplot_label(labels)
     #or
-    histogram(labels)
+    #histogram(labels)
 
     #Hist by class
     full_dataset, labels = remove_black_images(full_dataset, labels)
@@ -192,12 +208,11 @@ if __name__ == '__main__':
     violin_plot(full_dataset, labels)
 
     #Visualize 10x10 volcanoes
+    full_dataset, labels = normalize_ds(full_dataset, labels)
     positives = np.array(full_dataset)[np.where(np.array(labels)>0)[0],:]
-    fig, ax = plt.subplots(nrows=10, ncols=10) #, figsize=(9, 6))
-    ii = 0
-    for rr, row in enumerate(ax):
-        for cc, col in enumerate(row):
-            col.imshow(positives[ii].reshape(15,15), cmap='Greys')
-            ii+=1
-            col.axis('off')
-    fig.savefig('figures/positiveexamples.pdf', format = 'pdf', bbox_inches = 'tight')
+    volcano_examples(positives, labels, 'figures/positiveexamples.pdf')
+    pca_result = pca_transform(positives, 100, seed, perplexity=None)
+    print(pca_result.components_.shape)
+    volcano_examples(pca_result.components_, labels, 'figures/positiveexamples_pca.pdf')
+
+
