@@ -54,28 +54,16 @@ class DataLoader:
         return X_train, y_train, X_val, y_val, X_test, y_test
 
     def get_training_set(self):
-        return self.X_train
-
-    def get_training_labels(self):
-        return self.y_train
+        return self.X_train, self.y_train
 
     def get_validation_set(self):
-        return self.X_val
-
-    def get_validation_labels(self):
-        return self.y_val
+        return self.X_val, self.y_val
 
     def get_testing_set(self):
-        return self.X_test
-
-    def get_testing_labels(self):
-        return self.y_test
+        return self.X_test, self.y_test
 
     def get_full_dataset(self):
-        return self.full_dataset
-
-    def get_all_labels(self):
-        return self.all_labels
+        return self.full_dataset, self.all_labels
 
     def get_data_tuple(self):
         """
@@ -88,11 +76,11 @@ class DataLoader:
 
 if __name__ == "__main__":
     data = DataLoader()
-    train = data.get_training_set()
-    val = data.get_validation_set()
-    test = data.get_testing_set()
-    full = data.get_full_dataset()
-    labels = data.get_all_labels()
+    train, labels = data.get_training_set()
+    val, labels = data.get_validation_set()
+    test, labels = data.get_testing_set()
+    full, labels = data.get_full_dataset()
+    labels, labels = data.get_all_labels()
     # print(len(data.get_training_set()), len(data.get_validation_set()), len(data.get_testing_set()))
     print(len(train), len(val), len(test))
     print(len(full))
