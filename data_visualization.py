@@ -191,3 +191,14 @@ if __name__ == '__main__':
 
     #Violin Plot
     violin_plot(full_dataset, labels)
+
+    #Visualize 10x10 volcanoes
+    positives = np.array(full_dataset)[np.where(np.array(labels)>0)[0],:]
+    fig, ax = plt.subplots(nrows=10, ncols=10) #, figsize=(9, 6))
+    ii = 0
+    for rr, row in enumerate(ax):
+        for cc, col in enumerate(row):
+            col.imshow(positives[ii].reshape(15,15), cmap='Greys')
+            ii+=1
+            col.axis('off')
+    fig.savefig('figures/positiveexamples.pdf', format = 'pdf', bbox_inches = 'tight')
