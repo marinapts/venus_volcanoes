@@ -115,6 +115,23 @@ class DataLoader:
         return self.training_set, self.training_labels, self.validation_set, self.validation_labels, \
                self.testing_set, self.testing_labels
 
+    def get_volcanoes_training_set(self):
+        """Returns the training set with only the positive examples (volcanoes with labels 1-4)
+
+        Returns:
+            X_train_volcanoes: Training examples of class volcano
+            y_train_volcanoes: List of labels ranging from 1 to 4
+        """
+        X_train_volcanoes = []
+        y_train_volcanoes = []
+
+        for training_example, label in zip(self.training_set, self.training_labels):
+            if label != 0:
+                X_train_volcanoes.append(training_example)
+                y_train_volcanoes.append(label)
+
+        return X_train_volcanoes, y_train_volcanoes
+
 
 if __name__ == "__main__":
     data = DataLoader()
