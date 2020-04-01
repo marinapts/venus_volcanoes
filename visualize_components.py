@@ -114,32 +114,33 @@ if __name__ == '__main__':
     #full_dataset, labels = normalize_ds(full_dataset, labels)
 
     #PCA
-    #reduced_data = reduce_dims('pca', full_dataset, 3, seed)
-    #pca_plots(reduced_data, labels)
-    #print(reduced_data.shape)
+    reduced_data = reduce_dims('pca', full_dataset, labels, 3, seed, only_positives=False)
+    pca_plots(reduced_data, labels)
+    print(reduced_data.shape)
 
     #UMAP
-    #reduced_data = reduce_dims('umap', smaller_dataset, num_comps, seed)
-    #umap_plot(reduced_data, smaller_labels)
-    #print(reduced_data.shape)
+    reduced_data = reduce_dims('umap', smaller_dataset, smaller_labels, num_comps, seed, only_positives=False)
+    umap_plot(reduced_data, smaller_labels)
+    print(reduced_data.shape)
 
     #T-SNE
     #tsne(smaller_dataset, smaller_labels, seed)
 
     #LLE:
-    reduced_data = reduce_dims('lle', smaller_dataset, num_comps, seed, num_neighbors=5)
+    reduced_data = reduce_dims('lle', smaller_dataset, smaller_labels, num_comps, seed, num_neighbors=5, only_positives=False)
     lle_plot(reduced_data, smaller_labels)
     print(reduced_data.shape)
 
-    smaller_dataset = np.array(full_dataset)[0:1000,:]
-    smaller_labels = labels[0:1000]
+    smaller_dataset = np.array(smaller_dataset)[0:1000,:]
+    smaller_labels = smaller_labels[0:1000]
 
     #MDS:
-    reduced_data = reduce_dims('mds', smaller_dataset, num_comps, seed)
+    reduced_data = reduce_dims('mds', smaller_dataset, smaller_labels, num_comps, seed, False)
+    print(reduced_data.shape, len(smaller_labels))
     mds_plot(reduced_data, smaller_labels)
     print(reduced_data.shape)
 
     #Isomap:
-    reduced_data = reduce_dims('isomap', smaller_dataset, num_comps, seed)
+    reduced_data = reduce_dims('isomap', smaller_dataset, smaller_labels, num_comps, seed, False)
     isomap_plot(reduced_data, smaller_labels)
     print(reduced_data.shape)
