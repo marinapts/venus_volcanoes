@@ -80,7 +80,6 @@ if __name__ == "__main__":
     val, labels = data.get_validation_set()
     test, labels = data.get_testing_set()
     full, labels = data.get_full_dataset()
-    labels, labels = data.get_all_labels()
     # print(len(data.get_training_set()), len(data.get_validation_set()), len(data.get_testing_set()))
     print(len(train), len(val), len(test))
     print(len(full))
