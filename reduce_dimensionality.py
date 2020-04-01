@@ -8,8 +8,7 @@ from sklearn.manifold import LocallyLinearEmbedding, MDS, Isomap
 def load_data():
     # Load the data
     data_loader = DataLoader()
-    full_dataset = data_loader.get_full_dataset()
-    labels = data_loader.get_all_labels()
+    full_dataset, labels = data_loader.get_full_dataset()
     return full_dataset, labels
 
 def normalise(array):
