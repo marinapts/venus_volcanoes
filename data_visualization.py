@@ -151,7 +151,6 @@ def barplot_label(labels):
                                    'slategrey']) #, bins = 50)
     fig.savefig('figures/labelsdistr.pdf', format = 'pdf', bbox_inches = 'tight')
 
-
 if __name__ == '__main__':
     seed = 8
     full_dataset, labels = load_data()
