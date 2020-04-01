@@ -2,6 +2,7 @@ from reduce_dimensionality import load_data, normalize_ds
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from src.pyvov import ChipsIndex
 
 def histogram(labels):
     categories = [0, 1, 2, 3, 4]
@@ -155,7 +156,11 @@ def barplot_label(labels):
 if __name__ == '__main__':
     seed = 8
     full_dataset, labels = load_data()
-    full_dataset = np.array(full_dataset)
+
+    ci = ChipsIndex()
+    full_dataset, labels = ci.get_all()
+
+    #full_dataset = np.array(full_dataset)
 
     #Hist full
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
@@ -187,7 +192,20 @@ if __name__ == '__main__':
     #full_dataset, labels = normalize_ds(full_dataset, labels)
 
     #Mean image by class
-    mean_image_by_class(full_dataset, labels)
+    #mean_image_by_class(full_dataset, labels)
 
     #Violin Plot
-    violin_plot(full_dataset, labels)
+    #violin_plot(full_dataset, labels)
+
+    #Visualize 10x10 volcanoes
+    positives = np.array(full_dataset)[np.where(np.array(labels)>0)[0],:]
+    fig, ax = plt.subplots(nrows=10, ncols=10) #, figsize=(9, 6))
+    ii = 0
+    for rr, row in enumerate(ax):
+        for cc, col in enumerate(row):
+            col.imshow(positives[ii].reshape(15,15), cmap='Greys')
+            ii+=1
+            col.axis('off')
+    fig.savefig('figures/positiveexamples.pdf', format = 'pdf', bbox_inches = 'tight')
+
+
