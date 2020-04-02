@@ -55,20 +55,11 @@ class DataLoader:
     def get_training_set(self):
         return self.X_train, self.y_train
 
-    def get_training_labels(self):
-        return self.training_labels
-
     def get_validation_set(self):
         return self.X_val, self.y_val
 
-    def get_validation_labels(self):
-        return self.validation_labels
-
     def get_testing_set(self):
         return self.X_test, self.y_test
-
-    def get_testing_labels(self):
-        return self.testing_labels
 
     def get_full_dataset(self):
         return self.full_dataset, self.all_labels
