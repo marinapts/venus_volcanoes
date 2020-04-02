@@ -122,28 +122,22 @@ def normalize(X):
         
     return new_X
 
-def evaluate_experiment(exp_name='A1'):
+def evaluate_experiment(exp_name='A2'):
 
     print("evaluating experiment {}".format(exp_name))
-    ci = ChipsIndex()
 
-    X_train = np.array(ci.training_split_for(exp_name))
-    X_test = np.array(ci.testing_split_for(exp_name))
-
-    labels_train = np.array(ci.labels_for(exp_name)['trn'])
-    labels_test = np.array(ci.labels_for(exp_name)['tst'])
+    data = DataLoader(exp_name)
     
-    ## make labels 
-    y_train = labels_train
-    # y_train = np.zeros_like(labels_train)
-    # for idx, item in enumerate(labels_train):
-    #     if item > 0:
-    #         y_train[idx] += 1
+    X_train, y_train = data.get_training_set()
+    X_test, y_test = data.get_testing_set()
 
-    y_test = np.zeros_like(labels_test)
-    for idx, item in enumerate(labels_test):
-        if item > 0:
-            y_test[idx] += 1
+    X_train = np.asarray(X_train)
+    y_train = np.asarray(y_train)
+    X_test = np.asarray(X_test)
+    y_test = np.asarray(y_test)
+
+    y_train[np.where(y_train>0)]=1
+    y_test[np.where(y_test>0)]=1
     
     """
     set thresholds for evaluation as you like -- these are referred to as
@@ -155,7 +149,8 @@ def evaluate_experiment(exp_name='A1'):
 
 
 if __name__ == "__main__":
-	evaluate_experiment()
+	for exp in ['A1', 'A2', 'A3', 'A4']:
+		evaluate_experiment(exp_name=exp)
 
 
 
