@@ -7,7 +7,6 @@ from sklearn.model_selection import train_test_split
 class DataLoader:
     def __init__(self, experiment_names=['C1', 'D4'], validation_ratio=0.1, testset_ratio=0.1, seed=8):
         ci = ChipsIndex()
-
         if experiment_names == ['C1', 'D4']:
             self.full_dataset, self.all_labels = ci.get_all()
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.full_dataset, self.all_labels, test_size=testset_ratio, random_state=seed)
@@ -56,11 +55,20 @@ class DataLoader:
     def get_training_set(self):
         return self.X_train, self.y_train
 
+    def get_training_labels(self):
+        return self.training_labels
+
     def get_validation_set(self):
         return self.X_val, self.y_val
 
+    def get_validation_labels(self):
+        return self.validation_labels
+
     def get_testing_set(self):
         return self.X_test, self.y_test
+
+    def get_testing_labels(self):
+        return self.testing_labels
 
     def get_full_dataset(self):
         return self.full_dataset, self.all_labels
