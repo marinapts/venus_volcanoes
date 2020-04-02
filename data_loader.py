@@ -17,13 +17,9 @@ class DataLoader:
                                                                                   random_state=seed)
 
         else:
-            self.full_dataset, self.all_labels = ci.get_specific(experiment_names)
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.full_dataset, self.all_labels,
-                                                                                    test_size=testset_ratio,
-                                                                                    random_state=seed)
-            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train,
-                                                                                  test_size=validation_ratio,
-                                                                                  random_state=seed)
+            self.X_train, self.X_test, self.y_train, self.y_test = ci.get_specific(experiment_names)
+            #self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.full_dataset, self.all_labels, test_size=testset_ratio, random_state=seed)
+            #self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train, test_size=validation_ratio, random_state=seed)
 
     def normalise_array(self, array):
         normalised_array = array - np.mean(array)
@@ -86,20 +82,11 @@ class DataLoader:
     def get_training_set(self):
         return self.X_train, self.y_train
 
-    def get_training_labels(self):
-        return self.training_labels
-
     def get_validation_set(self):
         return self.X_val, self.y_val
 
-    def get_validation_labels(self):
-        return self.validation_labels
-
     def get_testing_set(self):
         return self.X_test, self.y_test
-
-    def get_testing_labels(self):
-        return self.testing_labels
 
     def get_full_dataset(self):
         return self.full_dataset, self.all_labels
