@@ -2,4 +2,11 @@ data
 .env/
 src/__pycache__/
 figures/
+<<<<<<< HEAD
 checkpoints/
+=======
+__pycache__/
+.DS_Store
+old/
+.idea
+>>>>>>> master
