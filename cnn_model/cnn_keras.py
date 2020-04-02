@@ -16,6 +16,7 @@ from sklearn.metrics import confusion_matrix
 from keras.callbacks.callbacks import EarlyStopping
 from keras.optimizers import Adam
 from keras.callbacks.callbacks import ModelCheckpoint
+from keras.preprocessing.image import ImageDataGenerator
 
 
 def plot_confusion_matrix(labels, predictions, p=0.5):
@@ -90,7 +91,7 @@ def make_model(input_rows=15, input_cols=15, num_classes=5):
     # model.add(Convolution2D(32, (3, 3), activation='relu', padding='same'))
     # model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
 
-    model.add(Convolution2D(8, (3, 3), activation='relu',
+    model.add(Convolution2D(32, (3, 3), activation='relu',
                             input_shape=(1, input_rows, input_cols),
                             padding='same',
                             data_format='channels_first'))
@@ -98,7 +99,7 @@ def make_model(input_rows=15, input_cols=15, num_classes=5):
 
     # model.add(Dropout(0.25))
 
-    model.add(Convolution2D(16, (4, 4), activation='relu', padding='valid', data_format='channels_first'))
+    model.add(Convolution2D(64, (3, 3), activation='relu', padding='valid', data_format='channels_first'))
     model.add(MaxPooling2D(pool_size=(2, 2), padding='valid', data_format='channels_first'))
 
     # model.add(Dropout(0.25))
@@ -109,8 +110,8 @@ def make_model(input_rows=15, input_cols=15, num_classes=5):
     # model.add(Dropout(0.25))
 
     model.add(Flatten())
+    model.add(Dense(32, activation='relu'))
     model.add(Dense(16, activation='relu'))
-    model.add(Dense(8, activation='relu'))
 
     # model.add(Dropout(0.5))
 
@@ -189,6 +190,53 @@ def train_model(model, X_train, Y_train, X_val, Y_val, exp_checkpoint_dir, num_e
               callbacks=[early_stopping_monitor, mcp_save])
 
 
+def train_model_iterator(model, data_iterator, X_val, Y_val, exp_checkpoint_dir, num_epochs=100,
+                         early_stopping_patience=0, class_weight_dict=None):
+    """
+    Trains a given Keras model according to user specifications
+
+    :param model: Keras model object
+    :param X_train: train input, numpy array of shape (n_samples, n_channels, n_rows, n_cols)
+    :param y_train: train labels, numpy array of shape (n_samples,)
+    :param X_val: val input, numpy array of shape (n_samples, n_channels, n_rows, n_cols)
+    :param y_val: val labels, numpy array of shape (n_samples,)
+    :param exp_checkpoint_dir: absolute directory for storing the model weights
+    :param num_epochs: number of epochs to run, default 32
+    :param batch_size: batch size, default 32
+    :param early_stopping_patience: number of epochs to run without improvement in validation loss before the
+                                    model stops
+    :param class_weight_dict: dictionary of class labels and class weights as key:value pairs for training
+    """
+
+    # If early stopping patience is zero, don't use early stopping,
+    # but we still want to use the weights from the best model (using patience=0 seems to have a bug)
+    if early_stopping_patience == 0:
+        patience = num_epochs
+    else:
+        patience = early_stopping_patience
+
+    early_stopping_monitor = EarlyStopping(
+        monitor='val_loss',
+        min_delta=0,
+        patience=patience,
+        verbose=0,
+        mode='auto',
+        baseline=None,
+        restore_best_weights=True
+    )
+    weights_path = os.path.join(exp_checkpoint_dir, 'weights.hdf5')
+
+    mcp_save = ModelCheckpoint(weights_path,
+                               save_best_only=True, monitor='val_loss', mode='min')
+
+    return model.fit(data_iterator,
+                     validation_data=(X_val, Y_val),
+                     epochs=num_epochs,
+                     verbose=2,
+                     class_weight=class_weight_dict,
+                     callbacks=[early_stopping_monitor, mcp_save])
+
+
 def main():
     # TODO (optional): parse constants from arguments
     EXPERIMENT_NAME = 'experimental'
@@ -223,6 +271,9 @@ def main():
                                                                            X_val, y_val,
                                                                            X_test, y_test, binary=USE_BINARY_CLASS)
 
+    data_generator = ImageDataGenerator()
+    data_iterator = data_generator.flow(X_train, y_train, batch_size=BATCH_SIZE)
+
     num_rows = X_train.shape[2]
     num_cols = X_train.shape[3]
     num_classes = np.unique(y_train).shape[0]
@@ -252,8 +303,10 @@ def main():
     print(model.summary())
 
     # Training
-    train_model(model, X_train, Y_train, X_val, Y_val, exp_checkpoint_dir=exp_checkpoint_dir, num_epochs=NUM_EPOCHS,
-                batch_size=BATCH_SIZE, early_stopping_patience=0, class_weight_dict=class_weight_dict)
+    history = train_model_iterator(model, data_iterator, X_val, Y_val,
+                                   exp_checkpoint_dir=exp_checkpoint_dir, num_epochs=NUM_EPOCHS,
+                                   early_stopping_patience=0,
+                                   class_weight_dict=class_weight_dict)
 
     print('Loading best model from checkpoints...')
     model.load_weights(load_path)
