@@ -29,22 +29,22 @@ class DataLoader:
         :return: (X_train, y_train), (X_val, y_val), (X_test, y_test): (input, output) numpy ndarray pairs
         of the format (n_samples, n_channels, n_rows, n_columns)
         """
-        N_train = len(self.training_labels)
-        N_val = len(self.validation_labels)
-        N_test = len(self.testing_labels)
+        N_train = len(self.y_train)
+        N_val = len(self.y_val)
+        N_test = len(self.y_test)
 
-        img_len = len(self.testing_set[0])  # obtain length of flattened image
+        img_len = len(self.X_test[0])  # obtain length of flattened image
         num_rows = int(np.sqrt(img_len))
         num_cols = int(np.sqrt(img_len))
         num_channels = 1  # only have pixel intensities, no colour
 
-        X_train = np.asarray(self.training_set).reshape((N_train, num_channels, num_rows, num_cols))
-        X_val = np.asarray(self.validation_set).reshape((N_val, num_channels, num_rows, num_cols))
-        X_test = np.asarray(self.testing_set).reshape((N_test, num_channels, num_rows, num_cols))
+        X_train = np.asarray(self.X_train).reshape((N_train, num_channels, num_rows, num_cols))
+        X_val = np.asarray(self.X_val).reshape((N_val, num_channels, num_rows, num_cols))
+        X_test = np.asarray(self.X_test).reshape((N_test, num_channels, num_rows, num_cols))
 
-        y_train = np.asarray(self.training_labels)
-        y_val = np.asarray(self.validation_labels)
-        y_test = np.asarray(self.testing_labels)
+        y_train = np.asarray(self.y_train)
+        y_val = np.asarray(self.y_val)
+        y_test = np.asarray(self.y_test)
 
         if binary_class is True:
             np.place(y_train, mask=y_train > 0, vals=1)
@@ -73,7 +73,7 @@ class DataLoader:
         return self.X_train, self.y_train, self.X_val, self.y_val, \
                self.X_test, self.y_test
 
-    def get_volcanoes_training_set(self):
+    def get_training_set_positives(self):
         """Returns the training set with only the positive examples (volcanoes with labels 1-4)
 
         Returns:
@@ -83,7 +83,7 @@ class DataLoader:
         X_train_volcanoes = []
         y_train_volcanoes = []
 
-        for training_example, label in zip(self.training_set, self.training_labels):
+        for training_example, label in zip(self.X_train, self.y_train):
             if label != 0:
                 X_train_volcanoes.append(training_example)
                 y_train_volcanoes.append(label)
