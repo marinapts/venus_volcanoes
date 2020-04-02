@@ -1,6 +1,5 @@
 from data_loader import DataLoader
 from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from collections import Counter
 from reduce_dimensionality import reduce_dims
