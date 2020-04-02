@@ -13,9 +13,9 @@ class DataLoader:
             self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train, test_size=validation_ratio, random_state=seed)
 
         else:
-            self.full_dataset, self.all_labels = ci.get_specific(experiment_names)
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.full_dataset, self.all_labels, test_size=testset_ratio, random_state=seed)
-            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train, test_size=validation_ratio, random_state=seed)
+            self.X_train, self.X_test, self.y_train, self.y_test = ci.get_specific(experiment_names)
+            #self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.full_dataset, self.all_labels, test_size=testset_ratio, random_state=seed)
+            #self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train, test_size=validation_ratio, random_state=seed)
 
     def convert_to_numpy_sets(self, binary_class=False):
         """
