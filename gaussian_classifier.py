@@ -17,6 +17,13 @@ class gaussian_clf():
         
         self.pca = principal_components(X_train, y_train, 6)
         X_train = self.pca.transform(X_train)
+
+        new_labels = np.zeros_like(y_train)
+        for idx, item in enumerate(y_train):
+            if item > 0:
+                new_labels[idx] += 1
+
+        label = new_labels
         
         positives = X_train[np.where(y_train>0)]
         negatives = X_train[np.where(y_train==0)]
@@ -83,11 +90,6 @@ def get_sets():
     
     labels = data.get_labels()
     labels = np.asarray(labels)
-    
-    new_labels = np.zeros_like(labels)
-    for idx, item in enumerate(labels):
-        if item > 0:
-            new_labels[idx] += 1
 
     
     n = new_labels.shape[0]
@@ -132,10 +134,11 @@ def evaluate_experiment(exp_name='A1'):
     labels_test = np.array(ci.labels_for(exp_name)['tst'])
     
     ## make labels 
-    y_train = np.zeros_like(labels_train)
-    for idx, item in enumerate(labels_train):
-        if item > 0:
-            y_train[idx] += 1
+    y_train = labels_train
+    # y_train = np.zeros_like(labels_train)
+    # for idx, item in enumerate(labels_train):
+    #     if item > 0:
+    #         y_train[idx] += 1
 
     y_test = np.zeros_like(labels_test)
     for idx, item in enumerate(labels_test):
