@@ -16,13 +16,14 @@ def histogram(labels):
     # Create the bar plot
     ax = sns.barplot(x=categories,
                      y=frequencies,
-                     palette = ['navajowhite',
+                     palette = ['papayawhip',
                                 'royalblue',
                                 'cornflowerblue' ,
                                 'lightsteelblue',
                                 'slategrey'],
                     saturation=.5)
-
+    plt.ylabel('Count',rotation=0)
+    ax.yaxis.set_label_coords(-0.05,1.02)
     # ax = sns.countplot(x=frequencies, color="red", saturation=.5, orient='v')
     total = len(labels)
 
@@ -78,7 +79,7 @@ def hist_by_class(full_dataset, labels):
 
 def mean_image_by_class(full_dataset, labels):
     #Mean image by class
-
+    label_list = ['no volcano', 'certainly', 'probably', 'possibly', 'pit']
     full_dataset = np.array(full_dataset)
     fig, ax = plt.subplots(nrows=3, ncols=2) #, figsize=(9, 6))
     ii = 0
@@ -95,7 +96,7 @@ def mean_image_by_class(full_dataset, labels):
                 ix = np.where(labels == label)
                 mean_image = np.mean(full_dataset[list(ix[0]), :], axis = 0)
                 col.imshow(mean_image.reshape(15,15), cmap='Greys')
-                col.set_title('Class ' + str(label))
+                col.set_title(label_list[label])
                 col.axis('off')
                 ii += 1
     #plt.subplots_adjust(wspace=0, hspace=0)
@@ -120,6 +121,7 @@ def table_meanstd_per_class(full_dataset, labels):
         print('min: ', np.min(full_dataset[list(ix[0]), :]))
 
 def violin_plot(full_dataset, labels):
+    label_list = ['no volcano', 'certainly', 'probably', 'possibly', 'pit']
     mean_per_image = np.mean(full_dataset, axis = 1)
     print(mean_per_image.shape)
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
@@ -134,6 +136,7 @@ def violin_plot(full_dataset, labels):
     ax.set_ylabel('Brightness',fontsize=20)
     ax.set_xlabel('Image Class',fontsize=20)
     ax.tick_params(labelsize=15)
+    ax.set_xticklabels(label_list)
     fig.savefig('figures/violin.pdf', format = 'pdf', bbox_inches = 'tight')
 
 def barplot_label(labels):
@@ -145,11 +148,13 @@ def barplot_label(labels):
     print(np.unique(labels), len_list)
     ax = sns.barplot(x=np.unique(labels),
                      y=len_list,
-                     palette = ['navajowhite',
+                     palette = ['papayawhip',
                                    'royalblue',
                                    'cornflowerblue' ,
                                    'lightsteelblue',
                                    'slategrey']) #, bins = 50)
+    plt.ylabel('Count',rotation=0)
+    ax.yaxis.set_label_coords(-0.05,1.02)
     fig.savefig('figures/labelsdistr.pdf', format = 'pdf', bbox_inches = 'tight')
 
 def volcano_examples(dataset, labels, filename):
@@ -180,9 +185,9 @@ if __name__ == '__main__':
     # fig.savefig('figures/histogram.pdf', format = 'pdf', bbox_inches = 'tight')
 
     #Barplot Labels
-    #barplot_label(labels)
+    barplot_label(labels)
     #or
-    #histogram(labels)
+    histogram(labels)
 
     #Hist by class
     full_dataset, labels = remove_black_images(full_dataset, labels)
