@@ -18,7 +18,7 @@ from keras.optimizers import Adam
 from keras.callbacks.callbacks import ModelCheckpoint
 
 
-def plot_cm(labels, predictions, p=0.5):
+def plot_confusion_matrix(labels, predictions, p=0.5):
     """
     Implements a confusion matrix via a seaborn heatmap
 
@@ -81,6 +81,8 @@ def make_model(input_rows=15, input_cols=15, num_classes=5):
     :param num_classes: number of output classes for classification (size of the one-hot vectors)
     :return: model
     """
+    # TODO: decide on final model architecture
+
     # Define the model
     model = Sequential()
 
@@ -88,15 +90,15 @@ def make_model(input_rows=15, input_cols=15, num_classes=5):
     # model.add(Convolution2D(32, (3, 3), activation='relu', padding='same'))
     # model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
 
-    model.add(Convolution2D(64, (3, 3), activation='relu',
+    model.add(Convolution2D(8, (3, 3), activation='relu',
                             input_shape=(1, input_rows, input_cols),
                             padding='same',
                             data_format='channels_first'))
     model.add(MaxPooling2D(pool_size=(2, 2), padding='valid', data_format='channels_first'))
 
-    model.add(Dropout(0.25))
+    # model.add(Dropout(0.25))
 
-    model.add(Convolution2D(128, (4, 4), activation='relu', padding='valid', data_format='channels_first'))
+    model.add(Convolution2D(16, (4, 4), activation='relu', padding='valid', data_format='channels_first'))
     model.add(MaxPooling2D(pool_size=(2, 2), padding='valid', data_format='channels_first'))
 
     # model.add(Dropout(0.25))
@@ -104,11 +106,11 @@ def make_model(input_rows=15, input_cols=15, num_classes=5):
     # model.add(Convolution2D(32, (4, 4), activation='relu', padding='valid', data_format='channels_first'))
     # model.add(MaxPooling2D(pool_size=(2, 2), padding='valid', data_format='channels_first'))
 
-    model.add(Dropout(0.25))
+    # model.add(Dropout(0.25))
 
     model.add(Flatten())
-    model.add(Dense(32, activation='relu'))
     model.add(Dense(16, activation='relu'))
+    model.add(Dense(8, activation='relu'))
 
     # model.add(Dropout(0.5))
 
@@ -213,7 +215,7 @@ def main():
     # Load volcano data object and the corresponding train, val and test sets
     print('Loading volcano data')
     volcano_data = volcano_data_loader.DataLoader()
-    (X_train, y_train), (X_val, y_val), (X_test, y_test) = volcano_data.convert_to_numpy_sets(
+    X_train, y_train, X_val, y_val, X_test, y_test = volcano_data.convert_to_numpy_sets(
         binary_class=USE_BINARY_CLASS)
 
     print('Pre-processing data')
@@ -268,7 +270,7 @@ def main():
 
     y_val_pred = model.predict_classes(X_val)
     print(classification_report(y_val, y_val_pred))
-    plot_cm(y_val, y_val_pred)
+    plot_confusion_matrix(y_val, y_val_pred)
     plt.show()
 
 
