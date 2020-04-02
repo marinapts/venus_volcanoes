@@ -15,7 +15,7 @@ class gaussian_clf():
         if self.normalize:
             X_train = normalize(X_train)
         
-        self.pca = principal_components(X_train, y_train, 6)
+        self.pca = principal_components(X_train, y_train, 35)
         X_train = self.pca.transform(X_train)
 
         new_labels = np.zeros_like(y_train)
@@ -48,29 +48,37 @@ class gaussian_clf():
             X = normalize(X)
         
         X = self.pca.transform(X)
-        true_positives = 0
-        true_negatives = 0
-        false_positives = 0
-        false_negatives = 0
+        tp = 0
+        tn = 0
+        fp = 0
+        fn = 0
         
         for idx in range(X.shape[0]):
             if self.predict_prob(X[idx]) > self.threshold:
                 if y[idx]==1:
-                    true_positives += 1
+                    tp += 1
                 else:
-                    false_positives += 1
+                    fp += 1
             
             else:
                 if y[idx]==1:
-                    false_negatives += 1
+                    fn += 1
                 else:
-                    true_negatives += 1
+                    tn += 1
         
-        print('true_positives:', true_positives)
-        print('true_negatives:', true_negatives)
-        print("false_positives:", false_positives)
-        print("false_negatives:", false_negatives)
-        print("detected volcanoes:", true_positives/(true_positives+false_negatives))
+        # print('true_positives:', tp)
+        # print('true_negatives:', tn)
+        # print("false_positives:", fp)
+        # print("false_negatives:", fn, "\n")
+        print("recall:", tp/(tp+fn))
+        print("precision:", tp/(tp+fp))
+
+        recall = tp/(tp+fn)
+        precision = tp/(tp+fp)
+
+        f1 = 2 * precision * recall / (precision + recall)
+
+        print("F1 score:", f1)
 
 def get_sets():
     """
@@ -109,6 +117,8 @@ def principal_components(X, y, n):
     
     pca = PCA(n_components=n)
     pcs = pca.fit(positives)
+    # print("Singular values:",pca.singular_values_)
+    # print("Explained variance:", pca.explained_variance_)
     
     return pca
 
@@ -117,40 +127,66 @@ def normalize(X):
     new_X = np.zeros_like(X)
     
     for idx in range(X.shape[0]):
+        # new_X[idx] = X[idx]
         new_X[idx] = X[idx] - np.mean(X[idx])
         new_X[idx] = new_X[idx]/np.std(X[idx])
         
     return new_X
 
-def evaluate_experiment(exp_name='A2'):
+def evaluate_experiment(exp_name='with all data'):
 
     print("evaluating experiment {}".format(exp_name))
 
-    data = DataLoader(exp_name)
+    data = DataLoader()
     
     X_train, y_train = data.get_training_set()
+    X_val, y_val = data.get_validation_set()
     X_test, y_test = data.get_testing_set()
 
     X_train = np.asarray(X_train)
     y_train = np.asarray(y_train)
+    X_val = np.asarray(X_val)
+    y_val = np.asarray(y_val)
     X_test = np.asarray(X_test)
     y_test = np.asarray(y_test)
 
+    ## clean data (remove all-zero datapoints)
+    removed_data = 0
+    m = np.all(X_train[:, 1:] == X_train[:, :-1], axis=1)*1
+    mask = np.where(m>0)
+    X_train = np.delete(X_train, mask, axis=0)
+    y_train = np.delete(y_train, mask, axis=0)
+    removed_data += np.sum(m)
+    m = np.all(X_test[:, 1:] == X_test[:, :-1], axis=1)*1
+    mask = np.where(m>0)
+    X_test = np.delete(X_test, mask, axis=0)
+    y_test = np.delete(y_test, mask, axis=0)
+    removed_data += np.sum(m)
+    m = np.all(X_val[:, 1:] == X_val[:, :-1], axis=1)*1
+    mask = np.where(m>0)
+    X_val = np.delete(X_val, mask, axis=0)
+    y_val = np.delete(y_val, mask, axis=0)
+    removed_data += np.sum(m)
+    print("Number of all-zero entries removed:", removed_data)
+
+
     y_train[np.where(y_train>0)]=1
+    y_val[np.where(y_val>0)]=1
     y_test[np.where(y_test>0)]=1
     
     """
     set thresholds for evaluation as you like -- these are referred to as
     operating points in the paper.
     """
-    baseline = gaussian_clf(threshold=0.75, normalize=False)
+    baseline = gaussian_clf(threshold=0.5, normalize=True)
     baseline.train(X_train, y_train)
-    baseline.evaluate(X_test, y_test)
+    baseline.evaluate(X_val, y_val)
 
 
 if __name__ == "__main__":
-	for exp in ['A1', 'A2', 'A3', 'A4']:
-		evaluate_experiment(exp_name=exp)
+	evaluate_experiment()
+
+
 
 
 
