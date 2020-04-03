@@ -1,11 +1,10 @@
 import numpy as np
-
 np.random.seed(8)
-import tensorflow
 
-tensorflow.random.set_seed(8)
+from tensorflow import set_random_seed
+set_random_seed(8)
+
 import random as rn
-
 rn.seed(8)
 
 import os
@@ -287,7 +286,7 @@ def main():
     print(classification_report(y_val, y_val_pred))
     plot_confusion_matrix(y_val, y_val_pred)
     plt.show()
-    
+
     # TODO: save confusion matrix, line below doesn't work
     # plt.savefig(os.path.join(exp_results_dir, 'confusion_matrix.png'))
 
