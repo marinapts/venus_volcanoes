@@ -11,8 +11,8 @@ import os
 import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
-
-import data_loader as volcano_data_loader
+from collections import Counter
+import argparse
 
 from keras.models import Sequential
 from keras.layers import Convolution2D, MaxPooling2D
@@ -26,6 +26,10 @@ from keras.callbacks.callbacks import EarlyStopping
 from keras.optimizers import Adam
 from keras.callbacks.callbacks import ModelCheckpoint
 from keras.preprocessing.image import ImageDataGenerator
+
+
+import data_loader as volcano_data_loader
+from augmentation import smote, adasyn
 
 
 def plot_confusion_matrix(labels, predictions, p=0.5):
@@ -191,8 +195,21 @@ def history_to_csv(history, path):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Run Building Damage Classification Training & Evaluation')
+    parser.add_argument('--augmentation',
+                        required=False,
+                        default=None,
+                        help="One of: [smote, horizontal_flip, vertical_flip")
+    parser.add_argument('--experiment_name',
+                        required=False,
+                        default='experiment',
+                        help="The name of the experiment under checkpoints")
+
+    args = parser.parse_args()
+    augmentation_type = args.augmentation
+
     # TODO (optional): parse constants from arguments
-    EXPERIMENT_NAME = 'experimental'
+    EXPERIMENT_NAME = args.experiment_name
     NUM_EPOCHS = 100
     BATCH_SIZE = 64
     LEARNING_RATE = 1e-3  # Default for Adam is 1e-3
@@ -200,8 +217,8 @@ def main():
     CLASS_WEIGHT_BALANCING = True
     SEED = 8
 
-    # Set seed for consistent results
-    np.random.seed(8)
+    # # Set seed for consistent results
+    # np.random.seed(8)
 
     # Make directory for experiment
     checkpoint_dir = os.path.join(os.getcwd(), 'checkpoints')
@@ -228,17 +245,43 @@ def main():
     X_train, y_train, X_val, y_val, X_test, y_test = volcano_data.convert_to_numpy_sets(
         binary_class=USE_BINARY_CLASS)
 
+    print('initial:', X_train.shape)
+    print(Counter(y_train))
+
+    horizontal_flip = False
+    vertical_flip = False
+
+    # Augment training data
+    if augmentation_type is not None:
+        if augmentation_type == 'smote':
+            X_train, y_train = smote(X_train, y_train)
+            print('augmented:', X_train.shape)
+
+        elif augmentation_type == 'adasyn':
+            X_train, y_train = adasyn(X_train, y_train)
+
+        elif augmentation_type == 'horizontal_flip':
+            horizontal_flip = True
+
+        elif augmentation_type == 'vertical_flip':
+            vertical_flip = True
+
+        else:
+            print('Wrong augmentation type')
+
     print('Pre-processing data')
     (X_train, Y_train), (X_val, Y_val), (X_test, Y_test) = preprocess_data(X_train, y_train,
                                                                            X_val, y_val,
                                                                            X_test, y_test, binary=USE_BINARY_CLASS)
+    print('preprocessed:', X_train.shape)
 
-    data_generator = ImageDataGenerator()
+    data_generator = ImageDataGenerator(horizontal_flip=horizontal_flip, vertical_flip=vertical_flip)
     data_iterator = data_generator.flow(X_train, y_train, batch_size=BATCH_SIZE, seed=SEED)
 
     num_rows = X_train.shape[2]
     num_cols = X_train.shape[3]
     num_classes = np.unique(y_train).shape[0]
+    print('rows,cols,classes', num_rows, num_cols, num_classes)
 
     # Todo: check other ways of dealing with class imbalance
     # Data is highly imbalanced, use class weights for training
