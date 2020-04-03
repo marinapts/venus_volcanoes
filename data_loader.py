@@ -9,13 +9,40 @@ class DataLoader:
         ci = ChipsIndex()
         if experiment_names == ['C1', 'D4']:
             self.full_dataset, self.all_labels = ci.get_all()
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.full_dataset, self.all_labels, test_size=testset_ratio, random_state=seed)
-            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train, test_size=validation_ratio, random_state=seed)
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.full_dataset, self.all_labels,
+                                                                                    test_size=testset_ratio,
+                                                                                    random_state=seed)
+            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train,
+                                                                                  test_size=validation_ratio,
+                                                                                  random_state=seed)
 
         else:
             self.X_train, self.X_test, self.y_train, self.y_test = ci.get_specific(experiment_names)
             #self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.full_dataset, self.all_labels, test_size=testset_ratio, random_state=seed)
             #self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train, test_size=validation_ratio, random_state=seed)
+
+    def normalise_array(self, array):
+        normalised_array = array - np.mean(array)
+        normalised_array = normalised_array / np.std(normalised_array)
+        return normalised_array
+
+    def normalise_split(self, split, split_labels):
+        # Indices of constant images
+        indices = [i for i in np.arange(len(split)) if np.std(split[i]) == 0]
+
+        # Remove constant images
+        split = [split[i] for i in np.arange(len(split)) if i not in indices]
+        split_labels = [split_labels[i] for i in np.arange(len(split_labels)) if i not in indices]
+
+        # Normalise the remaining data
+        split = [self.normalise_array(image) for image in split]
+
+        return split, split_labels
+
+    def preprocess_data(self):
+        self.X_train, self.y_train = self.normalise_split(self.X_train, self.y_train)
+        self.X_val, self.y_val = self.normalise_split(self.X_val, self.y_val)
+        self.X_test, self.y_test = self.normalise_split(self.X_test, self.y_test)
 
     def convert_to_numpy_sets(self, binary_class=False):
         """
