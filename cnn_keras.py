@@ -196,6 +196,7 @@ def history_to_csv(history, path):
 
 def main():
     parser = argparse.ArgumentParser(description='Run Building Damage Classification Training & Evaluation')
+    parser.add_argument('--run', required=True, help="One of: train or test")
     parser.add_argument('--augmentation',
                         required=False,
                         default=None,
@@ -204,9 +205,12 @@ def main():
                         required=False,
                         default='experiment',
                         help="The name of the experiment under checkpoints")
+    parser.add_argument('--class_weight_balancing', action='store_true', required=False)
 
     args = parser.parse_args()
     augmentation_type = args.augmentation
+    print('RUN:', args.run)
+    print('class_weight_balancing:', args.class_weight_balancing)
 
     # TODO (optional): parse constants from arguments
     EXPERIMENT_NAME = args.experiment_name
@@ -214,6 +218,7 @@ def main():
     BATCH_SIZE = 64
     LEARNING_RATE = 1e-3  # Default for Adam is 1e-3
     USE_BINARY_CLASS = True
+    # CLASS_WEIGHT_BALANCING = args.class_weight_balancing
     CLASS_WEIGHT_BALANCING = True
     SEED = 8
 
@@ -304,31 +309,49 @@ def main():
                   optimizer=Adam(learning_rate=LEARNING_RATE),
                   metrics=['accuracy'])
 
-    print('Constructed model:')
-    print(model.summary())
+    if args.run == 'train':  # Start training
+        print('\nTRAINING & VALIDATION')
+        print('Constructed model:')
+        print(model.summary())
 
-    # Training
-    history = train_model_iterator(model, data_iterator, X_val, Y_val,
-                                   exp_checkpoint_dir=exp_checkpoint_dir, num_epochs=NUM_EPOCHS,
-                                   early_stopping_patience=0,
-                                   class_weight_dict=class_weight_dict)
+        # Training
+        history = train_model_iterator(model, data_iterator, X_val, Y_val,
+                                       exp_checkpoint_dir=exp_checkpoint_dir, num_epochs=NUM_EPOCHS,
+                                       early_stopping_patience=0,
+                                       class_weight_dict=class_weight_dict)
 
-    print('Saving training metrics...')
-    history_to_csv(history, exp_results_dir)
+        print('Saving training metrics...')
+        history_to_csv(history, exp_results_dir)
 
-    print('Loading best model from checkpoints...')
-    model.load_weights(load_path)
+        print('Loading best model from checkpoints...')
+        model.load_weights(load_path)
 
-    # Evaluation of model with best validation performance
-    loss, acc = model.evaluate(X_val, y_val, verbose=2)
-    print('Showing performance summary of the best model')
-    print("Accuracy: {:5.2f}%".format(100 * acc))
-    print("Loss: {:10.9f}".format(loss))
+        # Evaluation of model with best validation performance
+        loss, acc = model.evaluate(X_val, y_val, verbose=2)
+        print('Showing performance summary of the best model')
+        print("Accuracy: {:5.2f}%".format(100 * acc))
+        print("Loss: {:10.9f}".format(loss))
 
-    y_val_pred = model.predict_classes(X_val)
-    print(classification_report(y_val, y_val_pred))
-    plot_confusion_matrix(y_val, y_val_pred)
-    plt.show()
+        y_val_pred = model.predict_classes(X_val)
+        print(classification_report(y_val, y_val_pred))
+        plot_confusion_matrix(y_val, y_val_pred)
+        plt.show()
+
+    else:  # Testing
+        print('\nTESTING')
+        print('Loading model %s for experiment %s' % (load_path, EXPERIMENT_NAME))
+        model.load_weights(load_path)
+
+        # Evaluation of model on test set
+        loss, acc = model.evaluate(X_test, y_test, verbose=2)
+        print('Showing performance summary of the test set')
+        print("Accuracy: {:5.2f}%".format(100 * acc))
+        print("Loss: {:10.9f}".format(loss))
+
+        y_test_pred = model.predict_classes(X_test)
+        print(classification_report(y_test, y_test_pred))
+        plot_confusion_matrix(y_test, y_test_pred)
+        plt.show()
 
     # TODO: save confusion matrix, line below doesn't work
     # plt.savefig(os.path.join(exp_results_dir, 'confusion_matrix.png'))
