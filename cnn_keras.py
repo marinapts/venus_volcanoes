@@ -1,8 +1,8 @@
 import numpy as np
 np.random.seed(8)
 
-from tensorflow import set_random_seed
-set_random_seed(8)
+import tensorflow
+tensorflow.random.set_seed(8)
 
 import random as rn
 rn.seed(8)
